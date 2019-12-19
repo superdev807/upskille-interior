@@ -1,15 +1,24 @@
 import React from 'react';
+import { withStyles } from '@material-ui/core/styles'
 
-function App() {
+import TopBar from './components/TopBar'
+import Upload from './components/Upload'
+
+import styles from './constants/theme'
+
+function App(props) {
+  
+  const { classes } = props
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-      </header>
+    <div className = {classes.root}>
+      <div className = {classes.appFrame}>
+        <TopBar />
+        <Upload />
+      </div>
     </div>
+
   );
 }
 
-export default App;
+export default withStyles(styles, { withTheme: true })(App);
