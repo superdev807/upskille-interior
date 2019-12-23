@@ -1,7 +1,10 @@
 const IncomingForm = require('formidable').IncomingForm
 const createWorker = require('tesseract.js').createWorker
+const algoliasearch = require('algoliasearch')
 
-async function image_recognize(file_path) {  
+require('dotenv').config()
+
+async function image_recognize(file_path) {
   const worker = createWorker();
   await worker.load();
   await worker.loadLanguage('eng');
@@ -11,13 +14,16 @@ async function image_recognize(file_path) {
   return text
 }
 
-module.exports = function upload(req, res) {
+const client = algoliasearch(process.env.APP_KEY, process.env.ADMIN_KEY);
+const algoliIndex = client.initIndex('Upskille_DB')
+
+const upload = (req, res) => {
   var form = new IncomingForm()
 
   form.parse(req);
 
-  form.on('fileBegin', function (name, file){
-    file.path = __dirname + '/uploads/' + file.name;
+  form.on('fileBegin', function (name, file) {
+    file.path = './public/uploads/' + file.name;
   });
 
   form.on('file', function (name, file) {
@@ -27,10 +33,14 @@ module.exports = function upload(req, res) {
       })
       promise.then(
         result => {
-          console.log("--------------------------")
-          console.log("content of ", file.name)
-          console.log(result)
-          console.log("--------------------------")
+          algoliIndex.addObject({
+            fileName: file.name,
+            content: result
+          }, function(err, content) {
+            if ( err ) {
+              console.log("algolia search error", err)
+            }
+          })
         },
         error => {
           console.log("--------------------------")
@@ -43,4 +53,16 @@ module.exports = function upload(req, res) {
   });
 
   res.json()
+}
+
+const imgSearch = (req, res) => {
+  const { query } = req.params
+  algoliIndex.search({query: query}).then(function(response) {
+    res.status(200).json( {result: response.hits} )
+  })
+}
+
+module.exports = {
+  upload,
+  imgSearch
 }

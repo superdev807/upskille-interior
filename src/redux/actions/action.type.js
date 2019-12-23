@@ -1,0 +1,2 @@
+export const SET_FILE_LIST = 'SET_FILE_LIST'
+export const SET_DISPLAY_FILE_LIST = 'SET_DISPLAY_FILE_LIST'

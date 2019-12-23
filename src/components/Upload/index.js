@@ -10,7 +10,6 @@ class Upload extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      files: [],
       uploading: false,
       uploadProgress: {},
       successfullUploaded: false
@@ -22,16 +21,18 @@ class Upload extends Component {
     this.renderActions = this.renderActions.bind(this);
   }
 
-  onFilesAdded(files) {
-    this.setState(prevState => ({
-      files: prevState.files.concat(files)
-    }));
+  onFilesAdded(newFiles) {
+    const { files } = this.props
+    this.props.setFileList(files.concat(newFiles))
   }
 
   async uploadFiles() {
     this.setState({ uploadProgress: {}, uploading: true });
     const promises = [];
-    this.state.files.forEach(file => {
+
+    const { files } = this.props
+
+    files.forEach(file => {
       promises.push(this.sendRequest(file));
     });
     try {
@@ -102,12 +103,16 @@ class Upload extends Component {
   }
 
   renderActions() {
+
+    const { files } = this.props
+
     if (this.state.successfullUploaded) {
       return (
-        <button
-          onClick={() =>
-            this.setState({ files: [], successfullUploaded: false })
-          }
+        <button 
+          onClick={() => {
+            this.props.setFileList([])
+            this.setState({ successfullUploaded: false })
+          }}
         >
           Clear
         </button>
@@ -115,7 +120,7 @@ class Upload extends Component {
     } else {
       return (
         <button
-          disabled={this.state.files.length < 0 || this.state.uploading}
+          disabled={(files && files.length < 0) || this.state.uploading}
           onClick={this.uploadFiles}
         >
           Upload
@@ -125,6 +130,8 @@ class Upload extends Component {
   }
 
   render() {
+    const { files } = this.props
+    
     return (
       <div className="Upload">
         <span className="Title">Upload Files</span>
@@ -136,7 +143,7 @@ class Upload extends Component {
             />
           </div>
           <div className="Files">
-            {this.state.files.map(file => {
+            {files && files.map(file => {
               return (
                 <div key={file.name} className="Row">
                   <span className="Filename">{file.name}</span>
