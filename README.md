@@ -4,6 +4,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### `npm run server`
+run server for the image upload to backend side and run the search engine
+server will run on [http://localhost:8000]
+
 ### `npm start`
 
 Runs the app in the development mode.<br />

@@ -1,7 +1,8 @@
 const IncomingForm = require('formidable').IncomingForm
+// const Tesseract = require('tesseract.js')
+// const tessInst = new Tesseract()
 const createWorker = require('tesseract.js').createWorker
 const algoliasearch = require('algoliasearch')
-
 require('dotenv').config()
 
 async function image_recognize(file_path) {
@@ -27,32 +28,33 @@ const upload = (req, res) => {
   });
 
   form.on('file', function (name, file) {
-      let promise = new Promise(function(resolve, reject) {
-        resolve(image_recognize(file.path))
-        reject(new Error("Unknown Error"))
-      })
-      promise.then(
-        result => {
-          algoliIndex.addObject({
-            fileName: file.name,
-            content: result
-          }, function(err, content) {
-            if ( err ) {
-              console.log("algolia search error", err)
-            }
-          })
-        },
-        error => {
-          console.log("--------------------------")
-          console.log("------error occured-------", error)
-          console.log(file.name)
-          console.log("--------------------------")
-        }
-      )
-      // console.log('Uploaded ' + file.path);
-  });
+    let promise = new Promise(function(resolve, reject) {
+      resolve(image_recognize(file.path))
+      reject(new Error("Unknown Error"))
+    })
 
-  res.json()
+    promise.then(
+      result => {
+        algoliIndex.addObject({
+          fileName: file.name,
+          content: result
+        }, function(err, content) {
+          if ( err ) {
+            console.log("algolia search error", err)
+          }
+        })
+        res.status(200).json({msg: "algolia success"})
+      }
+    ).catch(
+      error => {
+        console.log("--------------------------")
+        console.log("------error occured-------", error)
+        console.log(file.name)
+        console.log("--------------------------")
+        res.status(304).json({msg: "algolia falied"})
+      }
+    )
+  })
 }
 
 const imgSearch = (req, res) => {
